@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    image: eu.gcr.io/ytscrapper-363509/auto-channel-registry/autotubes:latest  # Replace [PROJECT_ID] with your actual GCP project ID
+    ports:
+      - "3002:3002"  # Map the additional backend port to the host
+      - "3000:3000"
+    networks:
+      - app-network
+    environment:
+      - BACK_PORT=5173
+      - SHARED_VOLUME=/app/shared
+    restart: unless-stopped  # Ensure the backend restarts on failures unless stopped manually
+    volumes:
+      - type: bind
+        source: ${USERPROFILE}/Documents/shared
+        target: /app/routes/VideoEditor/segment/
+      - type: bind
+        source: ${USERPROFILE}/Documents/shared
+        target: /app/shared/
+
+  frontend:
+    image: eu.gcr.io/ytscrapper-363509/auto-channel-registry/autotubes:latest  # Replace [PROJECT_ID] with your actual GCP project ID
+    ports:
+      - "5173:5173"
+    networks:
+      - app-network
+    environment:
+      - PORT=3000
+      - SHARED_VOLUME=/app/shared
+    restart: unless-stopped  # Ensure the frontend restarts on failures unless stopped manually
+    volumes:
+      - type: bind
+        source: ${USERPROFILE}/Documents/shared
+        target: /app/routes/VideoEditor/segment/
+      - type: bind
+        source: ${USERPROFILE}/Documents/shared
+        target: /app/shared/
+
+networks:
+  app-network:
+    driver: bridge
